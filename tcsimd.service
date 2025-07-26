@@ -1,0 +1,17 @@
+[Unit]
+Description=Thermocouple Simulator
+After=network.target
+
+[Service]
+Type=forking
+User=ec2-user
+WorkingDirectory=/home/ec2-user/thermocouple
+ExecStart=/home/ec2-user/thermocouple/tcsimd
+Restart=always
+StandardOutput=journal
+StandardError=journal
+
+
+[Install]
+WantedBy=multi-user.target
+

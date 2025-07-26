@@ -1,0 +1,12 @@
+[Unit]
+Description=IoT Thermostat Client Daemon
+After=network.target
+
+[Service]
+WorkingDirectory=/home/ec2-user/thermocouple
+ExecStart=/home/ec2-user/thermocouple/tc_client
+Restart=always
+
+
+[Install]
+WantedBy=multi-user.target

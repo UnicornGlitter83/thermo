@@ -1,0 +1,87 @@
+
+tc_cloud - Thermostat Cloud Server  
+  
+URL used: 18.116.46.202   port: 8001  
+  
+Java HTTP server provides RESTful API to manage thermostat data (temperature, status, timestamp), backed by MariaDB-compatible database (thermostat_data)  
+This uses an AWS EC2 instance  
+  
+FILES:  
+  
+Server:  
+- tc_cloud.java - main Java source file  
+- tc_cloud.class - compiled class  
+- tc_cloud.service - systemd service file for autostart  
+- json-20230618.jar - JSON handling library  
+- mysql-connector-j-9.3.0.jar - JDBC driver for MySQL/MariaDB  
+  
+Client:  
+- tc_main.c, tc_state.c, tc_error.c - C source files for daemon  
+- tc_client.c - client HTTP communication logic  
+- tcsimd - compiled daemon binary  
+- tcsimd.service - systemd service file for autostart  
+- tc_client.service - systemd service file for autostart  
+- client.service - systemd service file for autostart  
+  
+1.MariaDB requirements: (mysql -u root -p)  
+- Database named thermostat  
+- Table named thermostat_data  
+  
+or run code in MariaDB:  
+  
+CREATE DATABASE IF NOT EXISTS thermostat;  
+  
+USE thermostat;  
+  
+CREATE TABLE thermostat_data (  
+	id INT AUTO_INCREMENT PRIMARY KEY,  
+	temp FLOAT,  
+	status VARCHAR(10),  
+	ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP  
+);  
+  
+  
+2..service files should be moved to /etc/systemd/system/  
+sudo mv xxxxx.service /etc/systemd/system/  
+  
+after .service files have been moved:  
+  
+sudo systemctl daemon-reexec  
+sudo systemctl daemon-reload  
+  
+  
+3. Compile:  
+  
+javac -cp .:json=20230618.jar:mysql-connector-j-9.3.0.jar tc_cloud.java  
+  
+gcc -o tc_client tc_client.c -lcurl  
+gcc -o tcsimd tc_main.c tc_state.c tc_error.c  
+  
+4. Start services  
+  
+sudo systemctl enable --now tc_cloud.service  
+sudo systemctl enable --now tc_client.service  
+sudo systemctl enable --now tcsimd.service  
+sudo systemctl enable --now client.service  
+  
+  
+To TEST:  
+  
+POST:  
+curl -X POST -H "Content-Type: application/json" -d '{"temp":85.5, "status":"ON"}' http://18.116.46.202:8001/thermostat  
+  
+  
+GET (all entries):  
+curl http://18.116.46.202:8001/thermostat  
+  
+GET (with id):  
+curl http://18.116.46.202:8001/thermostat/id  
+  
+  
+PUT:  
+curl -X POST -H "Content-Type: application/json" -d '{"temp":45.3, "status":"OFF"}' http://18.116.46.202:8001/thermostat/id  
+  
+  
+DELETE:  
+curl -X DELETE http://18.116.46.202:8001/thermostat/id  
+  

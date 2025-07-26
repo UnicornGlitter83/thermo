@@ -1,0 +1,17 @@
+[Unit]
+Description=Thermocouple Client Service
+After=network.target
+
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ec2-user/thermocouple
+ExecStart=/home/ec2-user/thermocouple/client
+Restart=always
+StandardOutput=journal
+StandardError=journal
+User=ec2-user
+
+
+[Install]
+WantedBy=multi-user.target
