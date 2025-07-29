@@ -13,11 +13,11 @@ cp *.service /etc/systemd/system/
 
 echo "Systemd daemon reloading"
 systemctl daemon-reexec
-systemctl daemon-relaod
+systemctl daemon-reload
 
 
 echo "Creating MariaDB database/table"
-msql -u -root <<EOF
+mysql -u root <<EOF
 CREATE DATABASE IF NOT EXISTS thermostat;
 USE thermostat;
 CREATE TABLE IF NOT EXISTS thermostat_data (
